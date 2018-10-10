@@ -3,7 +3,7 @@
 Reconstruct static code from shiny apps
 
 <p align="center">
-![](https://user-images.githubusercontent.com/18220321/46750369-9f8aad00-cc6c-11e8-8852-eb0b37217c38.gif)  
+<img src="https://user-images.githubusercontent.com/18220321/46750369-9f8aad00-cc6c-11e8-8852-eb0b37217c38.gif"/>
 </p>
 
 
