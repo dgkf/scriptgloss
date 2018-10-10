@@ -1,0 +1,19 @@
+---
+title: "My Report"
+---
+  
+```{r initialize_code}
+{{.code}}
+```
+
+# Scatter Plot
+
+```{r plot1}
+{{plot1}}
+```
+
+# Distribution
+
+```{r plot2}
+{{plot2}}
+```

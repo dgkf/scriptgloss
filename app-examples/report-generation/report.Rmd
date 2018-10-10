@@ -1,0 +1,12 @@
+---
+title: "My Report"
+---
+  
+```{r initialize_code}
+{{.code}}
+```
+
+# My Plot
+```{r plot}
+{{plot}}
+```

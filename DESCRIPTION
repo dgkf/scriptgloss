@@ -1,0 +1,31 @@
+Package: scriptgloss
+Type: Package
+Version: 0.1.0
+Title: Functionality for creating static scripts from shiny apps
+Description: Tools and shiny elements for extracting state of a running shiny 
+    app and reconstructing shiny app code as a static script. Includes 
+    functionality for buttons to display that code in-app, copying current code 
+    to the clipboard and generating reports from a template document.
+Authors@R: c(
+    person(
+        given = "Doug", family = "Kelkhoff", 
+        email = "kelkhoff.douglas@gene.com", role = c("aut", "cre")))
+Maintainer: Doug Kelkhoff <kelkhoff.douglas@gene.com>
+License: Artistic-2.0
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.0
+Imports:
+    shiny,
+    rmarkdown,
+    knitr,
+    stringr,
+    CodeDepends,
+    grDevices,
+    utils,
+    stats,
+    methods
+Suggests:
+    testthat
+Enhances:
+    crayon
