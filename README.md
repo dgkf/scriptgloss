@@ -123,3 +123,7 @@ srv <- function(input, output, session) {
 shinyApp(ui, srv)
 ```
 
+# Acknowledgements
+
+Early prototypes developed at Genentech. Many thanks to my employer for their 
+encouragement and accommodation in allowing me to release this work publicly.
