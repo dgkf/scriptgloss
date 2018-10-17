@@ -39,18 +39,27 @@ shake_shiny_outputs <- function(code, ..., dots = list(),
   outputs <- c(list(...), as.list(dots))
   if (!length(outputs)) return(code)
   
+  # message(paste(capture.output(code), collapse = "\n"))
+  # message("[[[DONE]]]")
+  
   # always keep assignment to output variable
   code_thread <- which(sapply(
     code, 
     function(i) is.call(i) && i[1:2] == quote(output <- NULL)[1:2], 
     simplify = "logical"))
   
+  # always keep return statements
+  code_thread <- c(code_thread, which(sapply(
+    code,
+    function(i) is.call(i) && i[[1]] == "return",
+    simplify = "logical")))
+  
   # TODO: 
   #   Keep all syntax tree branches with a library/require/install call
   # FOR NOW:
   #   keep all top level calls to 'library', 'install.packages', 'require' or
   #   'devtools::...'
-  code_thread <- union(code_thread, which(sapply(code, function(i) 
+  code_thread <- c(code_thread, which(sapply(code, function(i) 
     is.call(i) && (
       i[[1]] == quote(require) || 
       i[[1]] == quote(library) || 
@@ -58,24 +67,34 @@ shake_shiny_outputs <- function(code, ..., dots = list(),
       as.character(i) %in% getNamespaceExports("devtools") ||
       (length(i[[1]]) > 1 && i[[1]][1:2] == call("::", as.name("devtools"))[1:2])
     ))))
+
+  code2 <<- code
+  code_thread2 <<- code_thread
+  outputs2 <<- outputs
+  
+  # code <- code2
+  # code_thread <- code_thread2
+  # outputs <- outputs2
   
   # shake tree
   code_thread <- Reduce(c, 
     Map(function(n) {
-      scr <- CodeDepends::readScript(txt = code)
-      col <- CodeDepends::inputCollector(
-        inclPrevOutput = TRUE, 
-        funcsAsInputs = TRUE)
-      incol <- CodeDepends::getInputs(scr, collector = col)
-      tryCatch(
-        CodeDepends::getDependsThread(n, incol),
-        error = function(e) c())
-    }, 
+        scr <- CodeDepends::readScript(txt = code)
+        col <- CodeDepends::inputCollector(
+          inclPrevOutput = TRUE, 
+          funcsAsInputs = TRUE)
+        
+        incol <- CodeDepends::getInputs(scr, collector = col)
+
+        tryCatch(
+          CodeDepends::getDependsThread(n, incol), 
+          error = function(e) integer())
+      }, 
       outputs), 
     init = code_thread)
   code_thread <- sort(unique(code_thread))
   
-  # display info (possibly use crayon, but has fallback for non unicode output)
+  # display info (possibly use crayon, but has fallback for standard output)
   if (isTRUE(verbose)) {
     if (requireNamespace("crayon", quietly = TRUE)) { 
       crayon::make_style(ltGrey = grDevices::rgb(0.7, 0.7, 0.7))

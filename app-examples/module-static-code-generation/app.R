@@ -193,8 +193,6 @@ ui <- fixedPage(
 )
 
 server <- function(input, output, session) {
-  tmp <<- session
-  
   df <- callModule(linkedScatter, "scatters", reactive(my_data),
     left = reactive(c("cty", "hwy")),
     right = reactive(c("drv", "hwy"))

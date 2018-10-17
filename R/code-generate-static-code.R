@@ -54,7 +54,7 @@
 #' @export
 #'
 generate_static_code <- function(server, ..., dots = list(), 
-    call_outputs = TRUE, flatten_outputs = TRUE,
+    call_outputs = TRUE, initialize_params = TRUE, flatten_outputs = TRUE,
     files = file.path(getwd(), c('app.R', 'global.R')),
     envir = parent.frame(),
     session = get("session", envir = envir)) {
@@ -82,8 +82,30 @@ generate_static_code <- function(server, ..., dots = list(),
   # TODO: purge_shiny_code should convert `callModule` calls to static code,
   #       include handling of `NS` functions
   srv_body <- purge_shiny_code(srv_body) # remove reactives and observers
-  # srv_body <- expand_callModule_calls(srv_body, session = session, envir = envir)
-  srv_body <- append_declaration(srv_body, dots = srv_args_no_io, after = 0)
+  
+  
+  
+  # expand_callModule_calls(srv_body, session = session, envir = envir)
+  srv_module_calls <- collect_callModule_calls(srv_body)
+  srv_module_calls <- lapply(srv_module_calls, get_callModule_metadata, session = session, envir = envir)
+  srv_body <- replace_callModule_calls(srv_body, session = session, envir = envir)
+  
+  # instantiate each module instance 
+  module_instance_definitions <- Map(function(md) {
+    call("<-", as.name(md$id), as.call(c(as.name(md$module), md$args)))
+  }, srv_module_calls[which(!duplicated(lapply(srv_module_calls, "[[", "id"), fromLast = TRUE))])
+  srv_body <- append_code(srv_body, module_instance_definitions, after = 0)
+  
+  # instantiate the module function body
+  module_definitions <- Map(function(md) {
+    call("<-", as.name(md$module), md$srv)
+  }, srv_module_calls[which(!duplicated(lapply(srv_module_calls, "[[", "module")))])
+  srv_body <- append_code(srv_body, module_definitions, after = 0)
+  
+  
+  
+  if (initialize_params)
+    srv_body <- append_declaration(srv_body, dots = srv_args_no_io, after = 0)
   srv_body <- append_code(srv_body, files, after = 0)
   
   # make each output a unique variable instead of part of an output list
@@ -103,7 +125,8 @@ generate_static_code <- function(server, ..., dots = list(),
     srv_body <- flatten_function_body(srv_body, outputs[[1]])
   # alternatively, keep outputs as function definitions and append calls
   } else {
-    srv_body <- append_declaration(srv_body, output = list(), after = 0)
+    if (initialize_params)
+      srv_body <- append_declaration(srv_body, output = list(), after = 0)
     if (call_outputs)
       srv_body <- append_output_calls(srv_body, dots = names(outputs))
   }
