@@ -155,17 +155,53 @@ scatterPlot <- function(data, cols) {
     scale_color_manual(values = c("black", "#66D65C"), guide = FALSE)
 }
 
+## Dummy module - Unique Values in First Column
+
+uniquesTableUI <- function(id) {
+  ns <- NS(id)
+  fluidRow(
+    column(12, verbatimTextOutput(ns("table")))
+  )
+}
+
+uniquesTable <- function(input, output, session, data, col) {
+  
+  filteredData <- reactive({
+    data() %>% dplyr::filter(selected_) %>% .[[col()]]
+  })
+  
+  output$table <- renderPrint ({
+    table(filteredData())
+  })
+  
+  uniques <- reactive({ unique(filteredData()) })
+  
+  return(uniques)
+}
+
 ## Linked scatter module
 
 linkedScatterUI <- function(id) {
   ns <- NS(id)
-  fluidRow(
-    column(6, plotOutput(ns("plot1"), brush = ns("brush"))),
-    column(6, plotOutput(ns("plot2"), brush = ns("brush")))
+  
+  fluidPage(
+    fluidRow(
+      column(6, plotOutput(ns("plot1"), brush = ns("brush"))),
+      column(6, plotOutput(ns("plot2"), brush = ns("brush")))
+    ),
+    fluidRow(
+      column(12, uniquesTableUI(ns("uniques_table")))
+    ),
+    fluidRow(
+      column(12, verbatimTextOutput(ns("uniques")))
+    )
   )
 }
 
 linkedScatter <- function(input, output, session, data, left, right) {
+  u <- callModule(uniquesTable, "uniques_table", data = dataWithSelection, 
+    col = reactive(right()[[1]]))
+  
   # Yields the data frame with an additional column "selected_"
   # that indicates whether that observation is brushed
   dataWithSelection <- reactive({
@@ -178,6 +214,10 @@ linkedScatter <- function(input, output, session, data, left, right) {
 
   output$plot2 <- renderPlot({
     scatterPlot(dataWithSelection(), right())
+  })
+  
+  output$uniques <- renderPrint({
+    paste("Unique Values:", paste(as.character(u()), collapse = ", "))
   })
 
   return(dataWithSelection)
@@ -196,7 +236,7 @@ server <- function(input, output, session) {
   df <- callModule(linkedScatter, "scatters", reactive(my_data),
     left = reactive(c("cty", "hwy")),
     right = reactive(c("drv", "hwy")))
-
+  
   output$summary <- renderText({
     sprintf("%d observation(s) selected", nrow(dplyr::filter(df(), selected_)))
   })

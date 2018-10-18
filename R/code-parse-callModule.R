@@ -14,7 +14,8 @@ replace_callModule_calls <- function(x, session, envir = parent.frame()) {
     x <- as.pairlist(lapply(x, replace_callModule_calls, session=session, envir=envir))
   else if (is.list(x))
     x <- lapply(x, replace_callModule_calls, session=session, envir=envir)
-  else stop("Don't know how to handle type ", typeof(x), call. = FALSE)
+  else
+    stop("[replace_callModule_calls] Don't know how to handle type ", typeof(x), call. = FALSE)
   
   return(x)
 }
@@ -35,7 +36,7 @@ collect_callModule_calls <- function(x, call_list = list()) {
     call_list <- append(call_list, unlist(lapply(x, collect_callModule_calls)))
   else if (is.list(x))
     call_list <- append(call_list, unlist(lapply(x, collect_callModule_calls)))
-  else stop("Don't know how to handle type ", typeof(x), call. = FALSE)
+  else stop("[collect_callModule_calls] Don't know how to handle type ", typeof(x), call. = FALSE)
   
   return(call_list)
 }
@@ -53,7 +54,7 @@ get_callModule_metadata <- function(cm, session, envir = parent.frame()) {
  
   module_srv    <- eval(cm_args$module, envir = envir)
   module_id     <- eval(cm_args$id, envir = envir)
-  module_scope <<- session$makeScope(module_id)
+  module_scope  <- session$makeScope(module_id)
   
   module_srv_args <- cm_args[which(!names(cm_args) %in% names(formals(shiny::callModule)))]
   module_srv_args <- c(module_srv_args, list(
@@ -74,7 +75,7 @@ get_callModule_metadata <- function(cm, session, envir = parent.frame()) {
       args   = module_srv_args),
     class = "module_metadata")
   
-  md <- process_callModule(md, session = session, envir = envir)
+  md <- process_callModule(md, session = module_scope, envir = envir)
   
   md
 }
@@ -88,8 +89,8 @@ process_callModule <- function(md, session, envir = parent.frame()) {
   
   # use generate_static_code() to build module code
   srv_body <- body(md$srv)
-  srv_body <- generate_static_code(md$srv, envir = cm_envir, files = list(), 
-      initialize_params = FALSE)
+  srv_body <- generate_static_code(md$srv, session = session, envir = cm_envir, 
+      files = list(), initialize_params = FALSE)
   
   # convert return statements from `return(...)` to `output$return <- ...` and 
   # assign last top level expression to output$return
@@ -119,7 +120,8 @@ process_return_calls <- function(x, depth = 1) {
     x <- as.pairlist(lapply(x, process_return_calls, depth = depth + 1))
   else if (is.list(x))
     x <- lapply(x, process_return_calls, depth = depth + 1)
-  else stop("Don't know how to handle type ", typeof(x), call. = FALSE)
+  else 
+    stop("[process_return_calls] Don't know how to handle type ", typeof(x), call. = FALSE)
     
   return(x)
 }

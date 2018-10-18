@@ -98,7 +98,7 @@ generate_static_code <- function(server, ..., dots = list(),
   
   # instantiate the module function body
   module_definitions <- Map(function(md) {
-    call("<-", as.name(md$module), md$srv)
+    call("<-", as.name(md$module), call("function", formals(md$srv), body(md$srv)))
   }, srv_module_calls[which(!duplicated(lapply(srv_module_calls, "[[", "module")))])
   srv_body <- append_code(srv_body, module_definitions, after = 0)
   
