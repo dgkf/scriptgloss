@@ -116,13 +116,9 @@ generate_static_code <- function(server, ..., dots = list(),
   #   dots = srv_args[!names(srv_args) %in% "output"], 
   #   envir = envir)
   
-  message(paste0(capture.output(srv_body), collapse = "\n"))
-  
   # replace output list entries with temporary objects for tree shaking
   srv_body <- shake_shiny_outputs(srv_body, dots = outputs, 
       keep_returns = keep_returns)
-  
-  message(paste0(capture.output(srv_body), collapse = "\n"))
   
   # clean up code in situation where only one output is being derived
   if (length(outputs) == 1 && flatten_outputs) {
