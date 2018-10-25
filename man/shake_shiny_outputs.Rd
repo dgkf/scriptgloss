@@ -4,7 +4,7 @@
 \alias{shake_shiny_outputs}
 \title{Shake syntax tree for shiny output-relevant code}
 \usage{
-shake_shiny_outputs(code, ..., dots = list(),
+shake_shiny_outputs(code, ..., dots = list(), keep_returns = FALSE,
   verbose = getOption("scriptgloss.verbose"))
 }
 \arguments{

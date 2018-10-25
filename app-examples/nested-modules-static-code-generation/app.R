@@ -1,141 +1,6 @@
 ## Example Adapted From:
 ## https://shiny.rstudio.com/gallery/module-example.html
 
-
-## callModule Steps (Method #1)
-## 
-##   1. convert to a function
-##      ```
-##      linkedScatter <- function(input, data, left, right) {
-##          dataWithSelection <- reactive({
-##            brushedPoints(data(), input$brush, allRows = TRUE)
-##          })
-##        
-##          output$plot1 <- renderPlot({
-##            scatterPlot(dataWithSelection(), left())
-##          })
-##        
-##          output$plot2 <- renderPlot({
-##            scatterPlot(dataWithSelection(), right())
-##          })
-##        
-##          return(dataWithSelection)
-##      }
-##      ```
-##   
-##   2. shake function body for returned value expression dependencies and
-##   convert reactive expressions to nullary functions.
-##      ```
-##      linkedScatter <- function(input, data, left, right) {
-##          dataWithSelection <- function() {
-##            brushedPoints(data(), input$brush, allRows = TRUE)
-##          }
-##        
-##          return(dataWithSelection)
-##      }
-##      ```
-##    
-##   3. replace `callModule` calls with function calls. reactives get replaced
-##   with nullary functions returning reactive expression. inputs get replaced
-##   with reactiveValuesToList(input) (in module scope).
-##      ```
-##      df <- linkedScatter(list(brush = NULL), function() my_data, 
-##        function() c("cty", "hwy"), function() c("drv", "hwy))
-##      ```
-##    
-## Considerations:
-##   - plot outputs internal to the module are unavailable for static code
-##   generation
-##
-
-## callModule Steps (Method #2)
-## 
-##   1. extract entire module body and process into static code
-##   ```
-##   input <- << reactiveValuesToList(input) in module scope >>
-##   output <- list()
-##   data <- function() my_data
-##   left <- function() c("cty", "hwy")
-##   right <- function() c("drv", "hwy")
-##   
-##   dataWithSelection <- function() {
-##     brushedPoints(data(), input$brush, allRows = TRUE)
-##   }
-##   
-##   output$plot1 <- renderPlot({
-##     scatterPlot(dataWithSelection(), left())
-##   })
-##   
-##   output$plot2 <- renderPlot({
-##     scatterPlot(dataWithSelection(), right())
-##   })
-##   
-##   dataWithSelection()
-##   ```
-##   
-##   2. "namespace" all locally scoped variables into module id list
-##   ```
-##   scatter <- list()
-##   scatter$input <- << reactiveValuesToList(input) in module scope >>
-##   scatter$output <- list()
-##   scatter$data <- function() my_data
-##   scatter$left <- function() c("cty", "hwy")
-##   scatter$right <- function() c("drv", "hwy")
-##   
-##   scatter$dataWithSelection <- function() {
-##     brushedPoints(data(), scatters$input$brush, allRows = TRUE)
-##   }
-##   
-##   scatters$output$plot1 <- renderPlot({
-##     scatterPlot(scatter$dataWithSelection(), scatter$left())
-##   })
-##   
-##   scatters$output$plot2 <- renderPlot({
-##     scatterPlot(scatter$dataWithSelection(), scatter$right())
-##   })
-##   
-##   scatter$return <- scatter$dataWithSelection
-##   ```
-##   
-##   
-##   3. flatten module code into calling server body and replace `callModule`
-##   statements with return value
-##   ```
-##   scatter <- structure(list(), class = c("scriptgloss-module", "list"))
-##   scatter$input <- << reactiveValuesToList(input) in module scope >>
-##   scatter$output <- list()
-##   scatter$data <- function() my_data
-##   scatter$left <- function() c("cty", "hwy")
-##   scatter$right <- function() c("drv", "hwy")
-##   
-##   scatter$dataWithSelection <- function() {
-##     brushedPoints(data(), scatters$input$brush, allRows = TRUE)
-##   }
-##   
-##   scatters$output$plot1 <- renderPlot({
-##     scatterPlot(scatter$dataWithSelection(), scatter$left())
-##   })
-##   
-##   scatters$output$plot2 <- renderPlot({
-##     scatterPlot(scatter$dataWithSelection(), scatter$right())
-##   })
-##   
-##   scatter$return <- scatter$dataWithSelection
-##   
-##   df <- scatter$return
-##   
-##   output$summary <- function() {
-##     sprintf("%d observation(s) selected", nrow(dplyr::filter(df(), selected_)))
-##   }
-##   ```
-##   
-## Considerations
-##   - Does creation of a minimal S3 class help to make the structure more
-##   clear? Could potentially add a show method to make it more discoverable.
-##   - Code gets very cluttered with large list structure
-##   
-
-
 try(setwd(dirname(rstudioapi::getActiveDocumentContext()$path)), silent = TRUE) # R Studio
 try(setwd(dirname(dirname(parent.frame(2)$ofile))), silent = TRUE) # running as a script
 message(sprintf('Working directory changed to "%s"', getwd()))
@@ -230,6 +95,7 @@ ui <- fixedPage(
   linkedScatterUI("scatters"),
   textOutput("summary"),
   verbatimTextOutput("code")
+  
 )
 
 server <- function(input, output, session) {
@@ -246,3 +112,9 @@ server <- function(input, output, session) {
 
 shinyApp(ui, server)
 
+
+# Can now access nested module outputs via
+# 
+# #> scatters %>% 
+# #>   module("uniques_table") %>% 
+# #>   get_output("table")

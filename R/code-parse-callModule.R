@@ -2,7 +2,7 @@ replace_callModule_calls <- function(x, session, envir = parent.frame()) {
   if (is.call(x))
     if (x[[1]] == quote(callModule) || x[[1]] == quote(shiny::callModule)) {
       module_meta <- get_callModule_metadata(x, session, envir=envir)
-      x <- bquote(.(as.name(module_meta$id))$return)
+      x <- bquote(callStaticModule(.(as.name(module_meta$id))))
     } else {
       x <- as.call(lapply(x, replace_callModule_calls, session=session, envir=envir))
     }
@@ -87,18 +87,33 @@ process_callModule <- function(md, session, envir = parent.frame()) {
   cm_envir <- as.environment(md$args)
   parent.env(cm_envir) <- envir
   
-  # use generate_static_code() to build module code
-  srv_body <- body(md$srv)
-  srv_body <- generate_static_code(md$srv, session = session, envir = cm_envir, 
-      files = list(), initialize_params = FALSE)
-  
   # convert return statements from `return(...)` to `output$return <- ...` and 
   # assign last top level expression to output$return
-  srv_body <- process_return_calls(srv_body)
+  body(md$srv) <- process_return_calls(body(md$srv))
   
-  # append `return(output)` statement to function body
+  # collect callModule statement metadata for informing return statement
+  srv_module_calls <- collect_callModule_calls(body(md$srv))
+  srv_module_calls <- lapply(srv_module_calls, get_callModule_metadata, session = session, envir = envir)
+  
+  # use generate_static_code() to build module code
+  srv_body <- generate_static_code(md$srv, session = session, envir = cm_envir, 
+      files = list(), initialize_params = FALSE, keep_returns = TRUE, 
+      flatten_outputs = FALSE)
+  
+  # append a return statement to function body, returning a 'scriptgloss_module'
+  # list
   if (is.call(i <- srv_body[[length(srv_body)]]) && i[[1]] == "<-")
-    srv_body <- as.call(append(as.list(srv_body), quote(return(output))))
+    srv_body <- as.call(append(as.list(srv_body), 
+        bquote(return(
+          structure(output,
+            return = .return, 
+            submodules = .(getInitializationCode({
+              sm <- Map(function(i) as.name(i$id), srv_module_calls)
+              setNames(sm, lapply(sm, as.character))
+            })),
+            class = c("scriptgloss_module", "list"))
+        ))
+      ))
   
   body(md$srv) <- srv_body
   md
@@ -109,7 +124,7 @@ process_callModule <- function(md, session, envir = parent.frame()) {
 process_return_calls <- function(x, depth = 1) {
   if (is.call(x))
     if (x[[1]] == quote(return))
-      x <- call("<-", quote(output$return), x[[2]])
+      x <- call("<-", quote(.return), x[[2]])
     else
       x <- as.call(lapply(x, process_return_calls, depth = depth + 1))
   else if (is.expression(x)) 
@@ -121,7 +136,7 @@ process_return_calls <- function(x, depth = 1) {
   else if (is.list(x))
     x <- lapply(x, process_return_calls, depth = depth + 1)
   else 
-    stop("[process_return_calls] Don't know how to handle type ", typeof(x), call. = FALSE)
+    stop("Don't know how to handle type ", typeof(x), call. = FALSE)
     
   return(x)
 }

@@ -54,7 +54,10 @@
 #' @export
 #'
 generate_static_code <- function(server, ..., dots = list(), 
-    call_outputs = TRUE, initialize_params = TRUE, flatten_outputs = TRUE,
+    call_outputs = TRUE, 
+    initialize_params = TRUE, 
+    keep_returns = FALSE,
+    flatten_outputs = TRUE,
     files = file.path(getwd(), c('app.R', 'global.R')),
     envir = parent.frame(),
     session = get("session", envir = envir)) {
@@ -83,8 +86,6 @@ generate_static_code <- function(server, ..., dots = list(),
   #       include handling of `NS` functions
   srv_body <- purge_shiny_code(srv_body) # remove reactives and observers
   
-  
-  
   # expand_callModule_calls(srv_body, session = session, envir = envir)
   srv_module_calls <- collect_callModule_calls(srv_body)
   srv_module_calls <- lapply(srv_module_calls, get_callModule_metadata, session = session, envir = envir)
@@ -95,14 +96,12 @@ generate_static_code <- function(server, ..., dots = list(),
     call("<-", as.name(md$id), as.call(c(as.name(md$module), md$args)))
   }, srv_module_calls[which(!duplicated(lapply(srv_module_calls, "[[", "id"), fromLast = TRUE))])
   srv_body <- append_code(srv_body, module_instance_definitions, after = 0)
-  
+
   # instantiate the module function body
   module_definitions <- Map(function(md) {
     call("<-", as.name(md$module), call("function", formals(md$srv), body(md$srv)))
   }, srv_module_calls[which(!duplicated(lapply(srv_module_calls, "[[", "module")))])
   srv_body <- append_code(srv_body, module_definitions, after = 0)
-  
-  
   
   if (initialize_params)
     srv_body <- append_declaration(srv_body, dots = srv_args_no_io, after = 0)
@@ -117,8 +116,13 @@ generate_static_code <- function(server, ..., dots = list(),
   #   dots = srv_args[!names(srv_args) %in% "output"], 
   #   envir = envir)
   
+  message(paste0(capture.output(srv_body), collapse = "\n"))
+  
   # replace output list entries with temporary objects for tree shaking
-  srv_body <- shake_shiny_outputs(srv_body, dots = outputs)
+  srv_body <- shake_shiny_outputs(srv_body, dots = outputs, 
+      keep_returns = keep_returns)
+  
+  message(paste0(capture.output(srv_body), collapse = "\n"))
   
   # clean up code in situation where only one output is being derived
   if (length(outputs) == 1 && flatten_outputs) {
