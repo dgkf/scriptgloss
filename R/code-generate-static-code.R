@@ -55,7 +55,7 @@
 #'
 generate_static_code <- function(server, ..., dots = list(), 
     call_outputs = TRUE, flatten_outputs = TRUE,
-    files = file.path(getwd(), c('app.R', 'global.R')),
+    files = file.path(getwd(), c('^app\\.R$', '^global\\.R$')),
     envir = parent.frame(),
     session = get("session", envir = envir)) {
   
@@ -123,7 +123,7 @@ generate_static_code <- function(server, ..., dots = list(),
 #' @return a list of expressions stripped of code 
 #' 
 parse_shiny_files <- function(
-    files = file.path(getwd(), c('app.R', 'global.R'))) {
+    files = file.path(getwd(), c('^app\\.R$', '^global\\.R$'))) {
   
   # file matching with case insensitive extension matching
   files <- Filter(length, lapply(files, function(i)
