@@ -55,7 +55,7 @@
 #'
 generate_static_code <- function(server, ..., dots = list(), 
     call_outputs = TRUE, flatten_outputs = TRUE,
-    files = file.path(getwd(), c('app.R', 'global.R')),
+    files = file.path(getwd(), c('^app\\.R$', '^global\\.R$')),
     envir = parent.frame(),
     session = get("session", envir = envir)) {
   
@@ -125,10 +125,8 @@ generate_static_code <- function(server, ..., dots = list(),
 parse_shiny_files <- function(
     files = file.path(getwd(), c('app.R', 'global.R'))) {
   
-  # file matching with case insensitive extension matching
-  files <- Filter(length, lapply(files, function(i)
-    list.files(dirname(i), basename(i), full.names = TRUE, ignore.case = TRUE)
-  ))
+  # filter down to only files that exist
+  files <- files[file.exists(files)]
   
   # parse code from discovered files
   files <- lapply(files, function(f) {
