@@ -26,7 +26,7 @@ getInitializationCode.default <- function(obj, name = NULL) {
     control = c(
       "keepNA", 
       "keepInteger", 
-      if (is.list(obj)) NULL else "showAttributes")
+      if (class(obj) == "list") NULL else "showAttributes")
     parse(text = utils::capture.output(dput(obj, control = control)))[[1]]
   },
     error = function(e) { 

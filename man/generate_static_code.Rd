@@ -5,8 +5,9 @@
 \title{Generate R code from shiny server code}
 \usage{
 generate_static_code(server, ..., dots = list(), call_outputs = TRUE,
-  flatten_outputs = TRUE, files = file.path(getwd(), c("app.R",
-  "global.R")), envir = parent.frame())
+  initialize_params = TRUE, keep_returns = FALSE, flatten_outputs = TRUE,
+  files = file.path(getwd(), c("app.R", "global.R")),
+  envir = parent.frame(), session = get("session", envir = envir))
 }
 \arguments{
 \item{server}{the server function to generate an R script for}

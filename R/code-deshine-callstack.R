@@ -40,12 +40,13 @@
 #' scriptgloss:::purge_shiny_code(code)
 #'
 purge_shiny_code <- function(x) {
-  if (is.call(x))
-    
+  if (is.call(x)) {
+      
     # find assignment to the shiny output list and replace with nullary function
-    if (x[[1]] == '<-' && is.call(x[[2]]) && x[[2]][[2]] == 'output') {
-      x[[3]] <- match.call(definition = eval(x[[3]][[1]]), call = x[[3]])
-      x[[3]] <- call("function", NULL, purge_shiny_code(as.list(x[[3]])$expr))
+    if (any(as.character(x[[1]]) %in% 
+        grep("^render", getNamespaceExports("shiny"), value = TRUE))) {
+      x <- match.call(definition = eval(x[[1]]), call = x)
+      x <- call("function", NULL, purge_shiny_code(as.list(x)$expr))
       x
       
     # find reactive({ ... }) calls and convert them to function() { ... }
@@ -63,7 +64,7 @@ purge_shiny_code <- function(x) {
       as.call(Filter(Negate(is.null), lapply(x, purge_shiny_code)))
     }
   
-  else if (is.expression(x)) 
+  } else if (is.expression(x)) 
     as.expression(purge_shiny_code(x[[1]]))
   else if (is.atomic(x) || is.name(x)) 
     x
