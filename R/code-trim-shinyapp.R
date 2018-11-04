@@ -73,7 +73,8 @@ trim_shinyApp <- function(x) {
   if (is.call(x)) {
     
     # mark shinyApp call as NULL, then filter NULL & after from
-    if (x[[1]] == 'shinyApp' || x[[1]] == quote(shiny::shinyApp)) {
+    if (x[[1]] == 'shinyApp' || 
+       (x[[1]] == "::" && x[[2]] == "shiny" && x[[3]] == "shinyApp")) {
       x <- NULL
     } else {
       call_list <- lapply(x, trim_shinyApp)

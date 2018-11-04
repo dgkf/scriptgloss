@@ -57,6 +57,7 @@ Not the most interesting code in the world, but operational!
 
 ```r
 library(shiny)
+library(scriptgloss)
 
 ui <- fluidPage(
   scriptglossJS(),
@@ -77,6 +78,7 @@ your own work.
 
 ```r
 library(shiny)
+library(scriptgloss)
 
 ui <- fluidPage(
   scriptglossJS(),
@@ -97,6 +99,7 @@ code!
 
 ```r
 library(shiny)
+library(scriptgloss)
 
 ui <- fluidPage(
   selectInput('x', 'x axis', choices = names(mtcars)),
