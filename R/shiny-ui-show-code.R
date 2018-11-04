@@ -30,9 +30,7 @@
 showCodeButton <- function(inputId, label = "Show R Code", 
   icon = shiny::icon("code"), ...) {
   
-  if (!check_shiny()) 
-    stop('This function cannot be used outside a shiny context.')
-  
+  check_shiny()
   shiny::actionButton(inputId, label, icon, ...)
 }
 
@@ -92,9 +90,7 @@ show_code_modal <- function(server, ..., title = 'R Code',
   id = 'modal_clipboardjs_btn', envir = parent.frame(),
   code = get_code(server, ..., call_outputs = TRUE, envir = envir)) {
   
-  if (!check_shiny()) 
-    stop('This function cannot be used outside a shiny context.')
-  
+  check_shiny()
   shiny::showModal(shiny::modalDialog(
     pre_code(
       code, 

@@ -58,8 +58,7 @@ report_download_handler <- function(template, server, ...,
     filename = paste(Sys.Date(), gsub('\\.[^.]+$','', template), sep = '-'),
     output_options = list(), envir = parent.frame()) {
   
-  if (!check_shiny()) 
-    stop('This function cannot be used outside a shiny context.')
+  check_shiny()
   
   # downloadHandler must be declared in server environment to reactively update,
   # build construction and call in the parent frame

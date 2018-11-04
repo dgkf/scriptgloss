@@ -63,8 +63,7 @@ append_code <- function(x, code, after = length(x)) {
 #' @importFrom shiny reactiveValuesToList
 #'
 append_declaration <- function(x, ..., after = length(x), dots = list()) {
-  if (!check_shiny()) return(x)
-  
+  check_shiny()
   dots <- rev(c(dots, list(...)))
   for (d in names(dots)) {
     # handle desired shiny-specific variable types

@@ -40,10 +40,9 @@ clipCodeButton <- function(server, label = NULL, icon = NULL,
     modal = FALSE, id = "clipboard_btn", envir = parent.frame(), 
     text = get_code(server, envir = envir)) {
 
-  if (missing(text) && !missing(server)) text <- get_code(server, envir = envir)
+  check_shiny()
   
-  if (!check_shiny()) 
-    stop('This function cannot be used outside a shiny context.')
+  if (missing(text) && !missing(server)) text <- get_code(server, envir = envir)
   
   # TODO: 
   #   Would be nice if this could be unique per output, but it generates a new 

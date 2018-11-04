@@ -38,7 +38,8 @@ reduce_nested_syntax <- function(x, depth = 1) {
           depth = depth + 1))
       
       if (length(expr) > 1) as.call(c(as.name("{"), expr))
-      else as.call(expr[[1]])
+      else if (length(expr) && !is.na(expr)) as.call(expr[[1]])
+      else as.call(as.list(as.name("{")))
     }
   else if (is.call(x))       as.call(lapply(x, reduce_nested_syntax))
   else if (is.expression(x)) as.expression(lapply(x, reduce_nested_syntax))

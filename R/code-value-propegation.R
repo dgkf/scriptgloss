@@ -54,16 +54,17 @@
 #' 
 #' @importFrom CodeDepends readScript getDetailedTimelines
 #' 
-propegate_values <- function(code, ..., dots = list(), envir = parent.frame()) {
+propegate_values <- function(code, ..., dots = list(), envir = NULL) {
   dots <- c(as.list(dots), list(...))
   
   # create an empty environment to evaluate values within
-  if (missing(envir)) {
+  if (missing(envir) || is.null(envir))
     envir <- new.env(parent = baseenv())
-    Map(function(x, value) assign(x, value, envir = envir), 
-      x = names(dots), 
-      value = dots)
-  }
+  
+  # assign values in new environment
+  Map(function(x, value) assign(x, value, envir = envir), 
+    x = names(dots), 
+    value = dots)
   
   # logical list indicating whether syntax elements are 'basic' elements
   basic_syntax <- lapply(as.list(code), function(i) {
@@ -71,16 +72,16 @@ propegate_values <- function(code, ..., dots = list(), envir = parent.frame()) {
   })
   
   # attempt to fill in code with evaluable atomic output
-  if (do.call(all, basic_syntax))
+  if (all(as.logical(basic_syntax)))
     try(if (is.atomic(e <- eval(code, envir = envir))) return(e), silent = TRUE)
   
   # otherwise, continue parsing relevant parts of the syntax tree
   if (is.call(code) || is.expression(code) || is.pairlist(code) || is.list(code)) {
     # get script metadata 
     scr      <- CodeDepends::readScript(txt = as.list(code))
-    timeline <- CodeDepends::getDetailedTimelines(scr, vars = names(dots))
+    timeline <- CodeDepends::getDetailedTimelines(scr, vars = names(envir))
     scr      <- scr[] # coerce to list
-    
+  
     # find applicable lines for variable instance before next declaration
     # (for single variable, general form below)
     # lines <- cumsum(lines$defined) == 0 & lines$used 
@@ -89,7 +90,7 @@ propegate_values <- function(code, ..., dots = list(), envir = parent.frame()) {
         ncol = length(unique(var))))) > 0
     
     # recursively iterate over relevant lines
-    scr[lines] <- lapply(scr[lines], propegate_values, dots = dots, envir = envir)
+    scr[lines] <- lapply(scr[lines], propegate_values, envir = envir)
     if (is.list(code)) scr else as.call(scr)
   } else if (is.atomic(code) || is.name(code)) { 
     code
