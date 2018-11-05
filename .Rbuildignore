@@ -2,3 +2,4 @@
 ^\.Rproj\.user$
 ^app-examples/*
 ^\.github
+^\.travis\.yml
