@@ -3,6 +3,10 @@
 #' @param code a list of lines of code for shaking
 #' @param ... names of elements of shiny output object to shake for
 #' @param dots additional ellipses arguments as list
+#' @param keep_returns whether to prune return statements if they arent' needed
+#'   for generated specified outputs. this is generally useful in situations
+#'   where a specific output is desired, but unwanted when generated compelete
+#'   nested module code.
 #' @param verbose logical indicating whether to print descriptive code output
 #'   indicating which lines were selected for inclusion
 #'

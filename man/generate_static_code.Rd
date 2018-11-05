@@ -6,7 +6,7 @@
 \usage{
 generate_static_code(server, ..., dots = list(), call_outputs = TRUE,
   initialize_params = TRUE, keep_returns = FALSE, flatten_outputs = TRUE,
-  files = file.path(getwd(), c("app.R", "global.R")),
+  files = file.path(getwd(), c("^app\\\\.R$", "^global\\\\.R$")),
   envir = parent.frame(), session = get("session", envir = envir))
 }
 \arguments{
@@ -19,6 +19,15 @@ generate_static_code(server, ..., dots = list(), call_outputs = TRUE,
 \item{call_outputs}{whether calls to the specified outputs should be appended
 at the end of the script}
 
+\item{initialize_params}{whether to add code to instantiate server function
+arguments in the generated script. this is generally useful for the top
+level call, but not for subsequent nested modules.}
+
+\item{keep_returns}{whether to prune return statements if they arent' needed
+for generated specified outputs. this is generally useful in situations
+where a specific output is desired, but unwanted when generated compelete
+nested module code.}
+
 \item{flatten_outputs}{whether a singular output should be collapsed into
 parent script}
 
@@ -28,6 +37,9 @@ parent script}
 passed to the server function. A construction of those arguments as they
 exist in the current state will attempt to be built into the generated
 script.}
+
+\item{session}{the active shiny session, defaults to the value of the
+variable by the same name in the parent environment.}
 }
 \value{
 a script representing the current state of the shiny app, allowing

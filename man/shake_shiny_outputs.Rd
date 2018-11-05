@@ -14,6 +14,11 @@ shake_shiny_outputs(code, ..., dots = list(), keep_returns = FALSE,
 
 \item{dots}{additional ellipses arguments as list}
 
+\item{keep_returns}{whether to prune return statements if they arent' needed
+for generated specified outputs. this is generally useful in situations
+where a specific output is desired, but unwanted when generated compelete
+nested module code.}
+
 \item{verbose}{logical indicating whether to print descriptive code output
 indicating which lines were selected for inclusion}
 }

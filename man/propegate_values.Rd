@@ -4,7 +4,7 @@
 \alias{propegate_values}
 \title{Partially evaluate a code block with given variable values}
 \usage{
-propegate_values(code, ..., dots = list(), envir = parent.frame())
+propegate_values(code, ..., dots = list(), envir = NULL)
 }
 \arguments{
 \item{code}{the code block to use as the basis for evaluation}

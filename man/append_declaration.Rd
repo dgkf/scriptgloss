@@ -30,6 +30,11 @@ appends all ellipses or dots arguments to code at specified
   location, reconstructing code to initialize variables in the code block.
 }
 \examples{
+\dontrun{
+# for example purposes, we can disable checcking of a running shiny instance
+# as a safeguard against calling `reactiveValuesToList` outside of shiny
+options(scirptgloss.testmode = TRUE)
+
 code <- quote({
   a <- tolower(a)
   b <- b[[1]]
@@ -41,5 +46,8 @@ scriptgloss:::append_declaration(as.list(code)[-1],
     a = 'my', 
     b = list(1,2,3),
     c = 'example', after = 0)
+    
+options(scirptgloss.testmode = FALSE) # reset to default behavior
+}
 
 }

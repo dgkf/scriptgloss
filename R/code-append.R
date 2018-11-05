@@ -48,6 +48,11 @@ append_code <- function(x, code, after = length(x)) {
 #' @return reconstructed code with declarations inserted
 #'
 #' @examples
+#' \dontrun{
+#' # for example purposes, we can disable checcking of a running shiny instance
+#' # as a safeguard against calling `reactiveValuesToList` outside of shiny
+#' options(scirptgloss.testmode = TRUE)
+#' 
 #' code <- quote({
 #'   a <- tolower(a)
 #'   b <- b[[1]]
@@ -59,6 +64,9 @@ append_code <- function(x, code, after = length(x)) {
 #'     a = 'my', 
 #'     b = list(1,2,3),
 #'     c = 'example', after = 0)
+#'     
+#' options(scirptgloss.testmode = FALSE) # reset to default behavior
+#' }
 #'
 #' @importFrom shiny reactiveValuesToList
 #'

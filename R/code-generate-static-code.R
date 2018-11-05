@@ -9,6 +9,13 @@
 #' @param dots optionally pass ellipses names of outputs as list
 #' @param call_outputs whether calls to the specified outputs should be appended
 #'   at the end of the script
+#' @param initialize_params whether to add code to instantiate server function
+#'   arguments in the generated script. this is generally useful for the top
+#'   level call, but not for subsequent nested modules.
+#' @param keep_returns whether to prune return statements if they arent' needed
+#'   for generated specified outputs. this is generally useful in situations
+#'   where a specific output is desired, but unwanted when generated compelete
+#'   nested module code.
 #' @param flatten_outputs whether a singular output should be collapsed into
 #'   parent script
 #' @param files the filepaths to search for available shiny globally scoped code
@@ -16,6 +23,8 @@
 #'   passed to the server function. A construction of those arguments as they
 #'   exist in the current state will attempt to be built into the generated
 #'   script.
+#' @param session the active shiny session, defaults to the value of the
+#'   variable by the same name in the parent environment.
 #'
 #' @return a script representing the current state of the shiny app, allowing
 #'   for independent reproduction of the shiny outputs.
