@@ -67,7 +67,7 @@ generate_static_code <- function(server, ..., dots = list(),
     initialize_params = TRUE, 
     keep_returns = FALSE,
     flatten_outputs = TRUE,
-    files = file.path(getwd(), c('^app\\.R$', '^global\\.R$')),
+    files = list.files(getwd(), c('^app\\.R$', '^global\\.R$')),
     envir = parent.frame(),
     session = get("session", envir = envir)) {
   
@@ -155,10 +155,7 @@ generate_static_code <- function(server, ..., dots = list(),
 #' @return a list of expressions stripped of code 
 #' 
 parse_shiny_files <- function(
-    files = file.path(getwd(), c('app.R', 'global.R'))) {
-  
-  # filter down to only files that exist
-  files <- files[file.exists(files)]
+    files = list.files(getwd(), c('^app\\.R$', '^global\\.R$'))) {
   
   # parse code from discovered files
   files <- lapply(files, function(f) {

@@ -11,6 +11,25 @@ Reconstruct static code from shiny apps
 built in a shiny context. Construct something in shiny and generate the code
 needed to produce it without needing to trudge through the app code.
 
+# Installation
+
+For now, due to a dependency on the `graph` package in Bioconductor by way of
+`CodeDepends`, this package will fail to install via the typical `devtools`
+mechanisms. Instead, please use `BiocManager` and follow any prompts to install
+the package, pulling from Bioconductor when necessary. I'll be working to reduce
+this impedence.
+
+```
+install.packages("BiocManager") # R (>3.5.0)
+BiocManager::install("dgkf/scriptgloss")
+```
+
+>**Developer Note**  
+>This was my first foray into advising installation via `BiocManager`. If you
+[run into issues, please report
+them](https://github.com/dgkf/scriptgloss/issues) and I'll work to make the
+installation seamless until this dependency requirement has been resolved.
+
 # Getting Started
 
 ## Start by building a `shiny` app
