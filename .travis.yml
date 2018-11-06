@@ -1,10 +1,13 @@
 language: r
+sudo: false
+cache: packages
 
 r:
   - release
   - devel
 
-cache: packages
+r_packages:
+  - covr
 
 after_success:
-  - Rscript -e 'covr::codecov()'
+  - Rscript -e 'library(covr); covr::codecov()'
