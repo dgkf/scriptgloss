@@ -58,7 +58,7 @@ get_callModule_metadata <- function(cm, session, envir = parent.frame()) {
   
   module_srv_args <- cm_args[which(!names(cm_args) %in% names(formals(shiny::callModule)))]
   module_srv_args <- c(module_srv_args, list(
-    input   = getInitializationCode(reactiveValuesToList(module_scope$input)),
+    input   = getInitializationCode(reactiveValuesToList(module_scope$input, all.names = TRUE)),
     output  = getInitializationCode(list()),
     session = getInitializationCode(NULL))) # module_scope
   

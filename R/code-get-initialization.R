@@ -23,10 +23,7 @@ setGeneric("getInitializationCode")
 #' @export
 getInitializationCode.default <- function(obj, name = NULL) {
   tryCatch({ 
-    control = c(
-      "keepNA", 
-      "keepInteger", 
-      if (class(obj) == "list") NULL else "showAttributes")
+    control = c("keepNA", "keepInteger", "niceNames", "showAttributes")
     parse(text = utils::capture.output(dput(obj, control = control)))[[1]]
   },
     error = function(e) { 

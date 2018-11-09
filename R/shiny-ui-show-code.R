@@ -30,7 +30,6 @@
 showCodeButton <- function(inputId, label = "Show R Code", 
   icon = shiny::icon("code"), ...) {
   
-  check_shiny()
   shiny::actionButton(inputId, label, icon, ...)
 }
 

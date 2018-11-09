@@ -114,6 +114,7 @@ generate_static_code <- function(server, ..., dots = list(),
   
   if (initialize_params)
     srv_body <- append_declaration(srv_body, dots = srv_args_no_io, after = 0)
+  
   srv_body <- append_code(srv_body, files, after = 0)
   
   # make each output a unique variable instead of part of an output list

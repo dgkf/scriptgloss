@@ -39,8 +39,6 @@
 clipCodeButton <- function(server, label = NULL, icon = NULL, 
     modal = FALSE, id = "clipboard_btn", envir = parent.frame(), 
     text = get_code(server, envir = envir)) {
-
-  check_shiny()
   
   if (missing(text) && !missing(server)) text <- get_code(server, envir = envir)
   

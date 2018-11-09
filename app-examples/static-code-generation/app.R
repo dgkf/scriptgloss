@@ -22,7 +22,7 @@ srv <- function(input, output, session) {
          y = my_data[[input$y]])
   })
   output$code <- renderPrint({
-    cat(get_code(srv))
+    cat(get_code(srv, "plot"))
     # alternatively, to pull all outputs:
     # cat(get_code(srv))
   })

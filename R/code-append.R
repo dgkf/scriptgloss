@@ -73,10 +73,11 @@ append_code <- function(x, code, after = length(x)) {
 append_declaration <- function(x, ..., after = length(x), dots = list()) {
   check_shiny()
   dots <- rev(c(dots, list(...)))
+  
   for (d in names(dots)) {
     # handle desired shiny-specific variable types
-    if ("reactivevalues" %in% class(dots[[d]])) 
-      dots[[d]] <- shiny::reactiveValuesToList(dots[[d]])
+    if ("reactivevalues" %in% class(dots[[d]]))
+      dots[[d]] <- shiny::reactiveValuesToList(dots[[d]], all.names = TRUE)
     
     # reject additional shiny-specific variables
     if (any(class(dots[[d]]) %in% names(getNamespace("shiny")))) next
