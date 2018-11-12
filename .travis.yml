@@ -6,16 +6,11 @@ r:
   - release
   - devel
 
+bioc_packages:
+  - graph
+
 r_packages:
   - covr
-  
-install:
-  - R -e 'install.packages("BiocManager", repos = "https://cloud.r-project.org")'
-  - R -e 'install.packages("devtools", repos = "https://cloud.r-project.org")'
-  - R -e 'install.packages("testthat", repos = "https://cloud.r-project.org")'
-  - R -e 'install.packages("shinytest", repos = "https://cloud.r-project.org")'
-  - R -e 'BiocManager::install("remotes", ask = FALSE)'
-  - R -e 'BiocManager::install("dgkf/scriptgloss", update = TRUE, ask = FALSE)'
 
 after_success:
   - Rscript -e 'library(covr); covr::codecov()'
