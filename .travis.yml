@@ -7,13 +7,12 @@ r:
   - devel
 
 r_packages:
-  - BiocManager
   - covr
-  - testthat
-  - shinytest
   
 install:
   - R -e 'install.packages("BiocManager", repos = "https://cloud.r-project.org")'
+  - R -e 'install.packages("testthat", repos = "https://cloud.r-project.org")'
+  - R -e 'install.packages("shinytest", repos = "https://cloud.r-project.org")'
   - R -e 'BiocManager::install("remotes", ask = FALSE)'
   - R -e 'BiocManager::install("dgkf/scriptgloss", update = TRUE, ask = FALSE)'
 
