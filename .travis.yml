@@ -11,6 +11,7 @@ r_packages:
   
 install:
   - R -e 'install.packages("BiocManager", repos = "https://cloud.r-project.org")'
+  - R -e 'install.packages("devtools", repos = "https://cloud.r-project.org")'
   - R -e 'install.packages("testthat", repos = "https://cloud.r-project.org")'
   - R -e 'install.packages("shinytest", repos = "https://cloud.r-project.org")'
   - R -e 'BiocManager::install("remotes", ask = FALSE)'
