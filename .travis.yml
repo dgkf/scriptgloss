@@ -9,6 +9,8 @@ r:
 r_packages:
   - BiocManager
   - covr
+  - testthat
+  - shinytest
   
 install:
   - R -e 'install.packages("BiocManager", repos = "https://cloud.r-project.org")'
