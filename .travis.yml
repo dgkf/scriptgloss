@@ -6,11 +6,12 @@ r:
   - release
   - devel
 
-bioc_packages:
-  - graph
-
 r_packages:
+  - BiocManager
   - covr
+  
+install:
+  - R -e 'BiocManager::install("dgkf/scriptgloss", update = TRUE, ask = FALSE)'
 
 after_success:
   - Rscript -e 'library(covr); covr::codecov()'

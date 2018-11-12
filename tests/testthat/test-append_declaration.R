@@ -38,7 +38,7 @@ test_that("shiny::reactiveValues get frozen and initialized as list", {
     app$getValue("code")
   }, {
     scriptgloss:::show_as_verbatim_text(list(
-      quote(input <- list(a = "mpg", b = "wt")),
+      quote(input <- list(`b-selectized` = "", a = "mpg", b = "wt", `a-selectized` = "")),
       quote(print("Here"))
     ))
   })
