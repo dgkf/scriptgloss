@@ -6,6 +6,9 @@ r:
   - release
   - devel
 
+bioc_packages:
+  - graph
+
 r_packages:
   - covr
 
