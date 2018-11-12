@@ -11,7 +11,8 @@ r_packages:
   - covr
   
 install:
-  - R -e 'install.packages("BiocManager"); BiocManager::install("dgkf/scriptgloss", update = TRUE, ask = FALSE);'
+  - R -e 'install.packages("BiocManager", repos = "https://cloud.r-project.org")'
+  - R -e 'BiocManager::install("dgkf/scriptgloss", update = TRUE, ask = FALSE);'
 
 after_success:
   - Rscript -e 'library(covr); covr::codecov()'
