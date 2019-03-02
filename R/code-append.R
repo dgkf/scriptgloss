@@ -51,7 +51,7 @@ append_code <- function(x, code, after = length(x)) {
 #' \dontrun{
 #' # for example purposes, we can disable checcking of a running shiny instance
 #' # as a safeguard against calling `reactiveValuesToList` outside of shiny
-#' options(scirptgloss.testmode = TRUE)
+#' options(scriptgloss.testmode = TRUE)
 #' 
 #' code <- quote({
 #'   a <- tolower(a)
