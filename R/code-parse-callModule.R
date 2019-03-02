@@ -22,8 +22,40 @@ replace_callModule_calls <- function(x, session, envir = parent.frame()) {
 
 
 
-collect_callModule_calls <- function(x, call_list = list()) {
-  if (is.call(x))
+attempt_intialize_callModule_calls <- function(x, envir = parent.frame()) {
+  if (is.call(x)) 
+    if (x[[1]] == "<-" && length(x[[3]]) && 
+        (x[[3]][[1]] == quote(callModule) || x[[3]][[1]] == quote(shiny::callModule))) {
+      
+      x2 <- eval(bquote(.(x[[2]])), envir = envir)
+      if (shiny::is.reactive(x2)) {
+        if (!is.null(getS3method("getInitializationCode", class(x2()), optional = TRUE, envir = envir)))
+          x[[3]] <- call("function", NULL, bquote({ .(getInitializationCode(x2())) }))
+      } else {
+        if (!is.null(getS3method("getInitializationCode", class(x2), optional = TRUE, envir = envir)))
+          x[[3]] <- getInitializationCode(x2)
+      }
+    } else {
+      x <- as.call(lapply(x, attempt_intialize_callModule_calls, envir = envir))
+    }
+  else if (is.expression(x)) 
+    x <- as.expression(attempt_intialize_callModule_calls(x[[1]], envir = envir))
+  else if (is.atomic(x) || is.name(x)) 
+    x
+  else if (is.pairlist(x)) 
+    x <- as.pairlist(lapply(x, attempt_intialize_callModule_calls, envir = envir))
+  else if (is.list(x))
+    x <- lapply(x, attempt_intialize_callModule_calls, envir = envir)
+  else stop("[attempt_initialize_callModule_calls] Don't know how to handle type ", typeof(x), call. = FALSE)
+  x
+}
+
+
+
+collect_callModule_calls <- function(x, envir = parent.frame(),
+    call_list = list()) {
+  
+  if (is.call(x)) 
     if (x[[1]] == quote(callModule) || x[[1]] == quote(shiny::callModule))
       call_list <- append(call_list, x)
     else
@@ -52,9 +84,11 @@ get_callModule_metadata <- function(cm, session, envir = parent.frame()) {
   cm_call_args <- as.list(cm_call)[-1]
   cm_args <- as.list(setNames(cm_args[unlist(cm_argidx)], names(cm_call_args)))
  
-  module_srv    <- eval(cm_args$module, envir = envir)
-  module_id     <- eval(cm_args$id, envir = envir)
-  module_scope  <- session$makeScope(module_id)
+  module_srv     <- eval(cm_args$module, envir = envir)
+  module_id      <- eval(cm_args$id, envir = envir)
+  module_scope   <- session$makeScope(module_id)
+  module_srv_env <- do.call(environment, list(module_srv))
+  module_srv_env <- if (is.null(module_srv_env)) envir else module_srv_env
   
   module_srv_args <- cm_args[which(!names(cm_args) %in% names(formals(shiny::callModule)))]
   module_srv_args <- c(module_srv_args, list(
@@ -75,7 +109,7 @@ get_callModule_metadata <- function(cm, session, envir = parent.frame()) {
       args   = module_srv_args),
     class = "module_metadata")
   
-  md <- process_callModule(md, session = module_scope, envir = envir)
+  md <- process_callModule(md, session = module_scope, envir = module_srv_env)
   
   md
 }

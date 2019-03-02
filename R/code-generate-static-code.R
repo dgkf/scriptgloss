@@ -95,8 +95,11 @@ generate_static_code <- function(server, ..., dots = list(),
   #       include handling of `NS` functions
   srv_body <- purge_shiny_code(srv_body) # remove reactives and observers
   
+  # pre-empt callModule handling by evaluating custom handlers when possible
+  srv_body <- attempt_intialize_callModule_calls(srv_body, envir = envir)
+  
   # expand_callModule_calls(srv_body, session = session, envir = envir)
-  srv_module_calls <- collect_callModule_calls(srv_body)
+  srv_module_calls <- collect_callModule_calls(srv_body, envir = envir)
   srv_module_calls <- lapply(srv_module_calls, get_callModule_metadata, session = session, envir = envir)
   srv_body <- replace_callModule_calls(srv_body, session = session, envir = envir)
   
