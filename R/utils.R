@@ -27,7 +27,7 @@ as_shown <- function(x) {
 check_shiny <- function(calling_f = as.list(sys.call(-1L))[[1]], 
     ignore = getOption("scriptgloss.testmode")) {
   
-  if ((!is.null(ignore) && ignore) || shiny::isRunning()) {
+  if (isTRUE(ignore) || shiny::isRunning()) {
     TRUE
   } else {
     stop(sprintf(
