@@ -3,17 +3,17 @@ choices = list(
   mtcars = mtcars,
   character_vector = c("lorem", "ipsum", "other", "text"))
 
-ui <- fluidPage(
- selectInput("in_item", 
+ui <- shiny::fluidPage(
+ shiny::selectInput("in_item", 
     NULL, 
     choices = names(choices)),
-  verbatimTextOutput("out_text")
+  shiny::verbatimTextOutput("out_text")
 )
 
 srv <- function(input, output, session) {
-  output$out_text <- renderPrint({
+  output$out_text <- shiny::renderPrint({
     print(choices[[input$in_item]])
   })
 }
 
-shinyApp(ui, srv)
+shiny::shinyApp(ui, srv)
