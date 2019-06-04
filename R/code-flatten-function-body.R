@@ -33,9 +33,11 @@ flatten_function_body <- function(code, name) {
   timeline <- CodeDepends::getDetailedTimelines(src, vars = list(name))
   
   output_line <- src[[loc <- utils::tail(which(timeline$defined), 1)]]
-  if (is.call(output_line[[3]]) && output_line[[3]][[1]] == "function")
-    append(src[-loc], as.list(output_line[[3]][[3]])[-1], loc)
-  else
+  if (is.call(output_line[[3]]) && output_line[[3]][[1]] == "function") {
+    output_body <- output_line[[3]][[3]]
+    if (output_body[[1]] == "{") output_body <- as.list(output_body)[-1]
+    append(src[-loc], output_body, loc)
+  } else
     src
 }
 
