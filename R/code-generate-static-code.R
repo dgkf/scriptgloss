@@ -93,7 +93,7 @@ generate_static_code <- function(server, ..., dots = list(),
   # process server code and append global files
   # TODO: purge_shiny_code should convert `callModule` calls to static code,
   #       include handling of `NS` functions
-  srv_body <- purge_shiny_code(srv_body) # remove reactives and observers
+  srv_body <- purge_shiny_code(srv_body, envir = envir) # remove reactives and observers
   
   # pre-empt callModule handling by evaluating custom handlers when possible
   srv_body <- attempt_intialize_callModule_calls(srv_body, envir = envir)
