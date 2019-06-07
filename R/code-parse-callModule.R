@@ -22,31 +22,33 @@ replace_callModule_calls <- function(x, session, envir = parent.frame()) {
 
 
 
-attempt_intialize_callModule_calls <- function(x, envir = parent.frame()) {
-  if (is.call(x)) 
-    if (x[[1]] == "<-" && length(x[[3]]) && 
+attempt_intialize_callModule_calls <- function(x, session, envir = parent.frame()) {
+  if (is.call(x)) {
+    if (x[[1]] == "<-" && length(x[[3]]) && is.call(x[[3]]) && 
         (x[[3]][[1]] == quote(callModule) || x[[3]][[1]] == quote(shiny::callModule))) {
-      
-      x2 <- eval(bquote(.(x[[2]])), envir = envir)
-      if (shiny::is.reactive(x2)) {
-        if (!is.null(getS3method("getInitializationCode", class(x2()), optional = TRUE, envir = envir)))
-          x[[3]] <- call("function", NULL, bquote({ .(getInitializationCode(x2())) }))
-      } else {
-        if (!is.null(getS3method("getInitializationCode", class(x2), optional = TRUE, envir = envir)))
-          x[[3]] <- getInitializationCode(x2)
-      }
+      try(silent = TRUE, { # a cop-out, just give up if can't access reactive val
+        x2 <- eval(bquote(.(x[[3]])), envir = envir)
+        if (shiny::is.reactive(x2)) {
+          if (!is.null(getS3method("getInitializationCode", class(x2()), optional = TRUE, envir = envir)))
+            x[[3]] <- call("function", NULL, bquote({ .(getInitializationCode(x2())) }))
+        } else {
+          if (!is.null(getS3method("getInitializationCode", class(x2), optional = TRUE, envir = envir)))
+            x[[3]] <- getInitializationCode(x2)
+        }
+      })
     } else {
-      x <- as.call(lapply(x, attempt_intialize_callModule_calls, envir = envir))
+      x <- as.call(lapply(x, attempt_intialize_callModule_calls, session = session, envir = envir))
     }
-  else if (is.expression(x)) 
-    x <- as.expression(attempt_intialize_callModule_calls(x[[1]], envir = envir))
+  } else if (is.expression(x)) 
+    x <- as.expression(attempt_intialize_callModule_calls(x[[1]], session = session, envir = envir))
   else if (is.atomic(x) || is.name(x)) 
     x
   else if (is.pairlist(x)) 
-    x <- as.pairlist(lapply(x, attempt_intialize_callModule_calls, envir = envir))
+    x <- as.pairlist(lapply(x, attempt_intialize_callModule_calls, session = session, envir = envir))
   else if (is.list(x))
-    x <- lapply(x, attempt_intialize_callModule_calls, envir = envir)
+    x <- lapply(x, attempt_intialize_callModule_calls, session = session, envir = envir)
   else stop("[attempt_initialize_callModule_calls] Don't know how to handle type ", typeof(x), call. = FALSE)
+  
   x
 }
 
@@ -87,8 +89,6 @@ get_callModule_metadata <- function(cm, session, envir = parent.frame()) {
   module_srv     <- eval(cm_args$module, envir = envir)
   module_id      <- eval(cm_args$id, envir = envir)
   module_scope   <- session$makeScope(module_id)
-  module_srv_env <- do.call(environment, list(module_srv))
-  module_srv_env <- if (is.null(module_srv_env)) envir else module_srv_env
   
   module_srv_args <- cm_args[which(!names(cm_args) %in% names(formals(shiny::callModule)))]
   module_srv_args <- c(module_srv_args, list(
@@ -109,8 +109,7 @@ get_callModule_metadata <- function(cm, session, envir = parent.frame()) {
       args   = module_srv_args),
     class = "module_metadata")
   
-  md <- process_callModule(md, session = module_scope, envir = module_srv_env)
-  
+  md <- process_callModule(md, session = module_scope, envir = envir)
   md
 }
 
@@ -124,7 +123,7 @@ process_callModule <- function(md, session, envir = parent.frame()) {
   # convert return statements from `return(...)` to `output$return <- ...` and 
   # assign last top level expression to output$return
   body(md$srv) <- process_return_calls(body(md$srv))
-  
+
   # collect callModule statement metadata for informing return statement
   srv_module_calls <- collect_callModule_calls(body(md$srv))
   srv_module_calls <- lapply(srv_module_calls, get_callModule_metadata, session = session, envir = envir)
@@ -133,7 +132,7 @@ process_callModule <- function(md, session, envir = parent.frame()) {
   srv_body <- generate_static_code(md$srv, session = session, envir = cm_envir, 
       files = list(), initialize_params = FALSE, keep_returns = TRUE, 
       flatten_outputs = FALSE)
-  
+
   # append a return statement to function body, returning a 'scriptgloss_module'
   # list
   if (is.call(i <- srv_body[[length(srv_body)]]) && i[[1]] == "<-")

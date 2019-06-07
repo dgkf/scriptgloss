@@ -81,7 +81,7 @@ generate_static_code <- function(server, ..., dots = list(),
   
   # get list of expressions from server function
   srv_body <- top_level_call_list(body(server))
-  
+
   # get list of requested output names, take all if none are specified
   outputs <- c(list(...), as.list(dots))
   if (!length(outputs)) outputs <- shiny_output_names(srv_body)
@@ -96,7 +96,7 @@ generate_static_code <- function(server, ..., dots = list(),
   srv_body <- purge_shiny_code(srv_body, envir = envir) # remove reactives and observers
   
   # pre-empt callModule handling by evaluating custom handlers when possible
-  srv_body <- attempt_intialize_callModule_calls(srv_body, envir = envir)
+  srv_body <- attempt_intialize_callModule_calls(srv_body, session = session, envir = envir)
   
   # expand_callModule_calls(srv_body, session = session, envir = envir)
   srv_module_calls <- collect_callModule_calls(srv_body, envir = envir)
